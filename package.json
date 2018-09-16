@@ -1,0 +1,23 @@
+{
+  "name": "chiftorrent",
+  "version": "1.0.0",
+  "description": "my Implentation of a torrent client in node js and python",
+  "main": "index.js",
+  "dependencies": {
+    "bencode": "^2.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MuhiaKevin/Chif-torrent.git"
+  },
+  "author": " <@MuhiaKevin/>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MuhiaKevin/Chif-torrent/issues"
+  },
+  "homepage": "https://github.com/MuhiaKevin/Chif-torrent#readme"
+}
