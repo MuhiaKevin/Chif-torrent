@@ -14,3 +14,11 @@ function getFiles(){
     return torrent.info;
 }
 
+let filee = getFiles();
+
+let filebencode = bencode.encode(filee);
+
+// console.log(filebencode);
+
+let hash = crypto.createHash('sha1').update(filebencode).digest('hex')
+console.log(hash);
