@@ -1,4 +1,4 @@
-# An implementation of a torrent client in Node Js #
+# An implementation of a torrent client in Node.js #
 
 Decided to feed my curiosity on a how bittorrent works by building a simple torrent client in Node Js.
 Happy Coding.
@@ -12,4 +12,4 @@ Happy Coding.
 
 * https://www.morehawes.co.uk/the-bittorrent-protocol
 
-* http://jonas.nitro.dk/bittorrent/bittorrent-rfc.html
+* https://www.seanjoflynn.com/research/bittorrent.html 
