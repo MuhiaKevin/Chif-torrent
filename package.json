@@ -4,7 +4,8 @@
   "description": "my Implentation of a torrent client in node js and python",
   "main": "index.js",
   "dependencies": {
-    "bencode": "^2.0.0"
+    "bencode": "^2.0.0",
+    "bignum": "^0.13.1"
   },
   "devDependencies": {},
   "scripts": {
