@@ -16,6 +16,7 @@ You can run the following command to install the dependencies using npm
 
 ### Running the program
 Run the following command to download a torrent file
+
 Example :
 
 `node main.js star-wars-the-rise-of-skywalker-2019-hdts-xvid-etrg.torrent`
