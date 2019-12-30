@@ -72,6 +72,7 @@ module.exports.getPeers = (torrent, callback) => {
             // parse announce response
             
             const announceResp = parseAnnounceResp(response);
+            console.log('announceResp')
             // pass peers to callback
             callback(announceResp.peers);
         }
@@ -161,7 +162,7 @@ function buildAnnounceReq (connId,torrent, port=6881 ){
     buf.writeUInt32BE(0, 80) //try and change offset to 84
     crypto.randomBytes(4).copy(buf,88);
     buf.writeInt32BE(-1,92);
-    buf.writeUInt32BE(port,96);
+    buf.writeUInt16BE(port, 96);
 
     return buf
 }
@@ -181,12 +182,22 @@ function buildAnnounceReq (connId,torrent, port=6881 ){
 */
 
 function parseAnnounceResp(resp) {
+
+    function group(iterable, groupSize){
+        let groups = [];
+        
+        for (let i = 0; i < iterable.length; i += groupSize){
+            groups.push(iterable.slice(i , i+groupSize));           
+        }
+        return groups;
+    }
+
     return {
         action: resp.readUInt32BE(0),
         transactionId: resp.readUInt32BE(4),
         leechers: resp.readUInt32BE(8),
         seeders: resp.readUInt32BE(12),
-        peers: util.group(resp.slice(20), 6).map(adress => {
+        peers: group(resp.slice(20), 6).map(adress => {
             return {
                 ip: adress.slice(0,4).join('.'),
                 port: adress.readUInt16BE(4)
