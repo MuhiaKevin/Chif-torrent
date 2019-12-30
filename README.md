@@ -22,9 +22,13 @@ Example :
 `node main.js star-wars-the-rise-of-skywalker-2019-hdts-xvid-etrg.torrent`
 
 ### TODO
-These are some of the additional features i plan to reasearch and implement:
+- Add retry method when when request does not receive tracker
+- Get peers from all trackers that are working
 
+### Future improvements
+These are some of the additional features i plan to reasearch and implement:
 - Use magnet links to download files
+
 - Use Distributed Hash tables instead of trackers
 - Allow for more than one downloads
 - Create a graphical interface

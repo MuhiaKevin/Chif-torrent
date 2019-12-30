@@ -9,11 +9,8 @@ const crypto = require('crypto'); // 1
 Steps in Tracker server communication
 
 1. Send a connect request
-
 2. Get the connect response and extract the connection id
-
 3.Use the connection id to send an announce request - this is where we tell the tracker which files we’re interested in
-
 4. Get the announce response and extract the peers list
 
 
@@ -27,24 +24,13 @@ module.exports.getPeers = (torrent, callback) => {
     let announcelist = torrent.getannouncelist();
     let url = "";
 
-    // udp://tracker.leechers-paradise.org:6969/announce
-    // udp://9.rarbg.me:2730/announce
 
     for (let i = 0; i < announcelist.length; i++) {
-        if (announcelist[i] === "udp://9.rarbg.me:2730/announce") {
-            url = announcelist[i];
-            // console.log(url);        
+        if (announcelist[i].substring(0, 3) === "udp") {
+            url = urlParse(announcelist[i]);
+            break;
         }
     }
-
-
-    // for (let i = 0; i < announcelist.length; i++) {
-    //     if (announcelist[i].substring(0, 3) === "udp") {
-    //         url = urlParse(announcelist[i]);
-    //         console.log(url);
-    //         break;
-    //     }
-    // }
 
     udpSend(socket, buildConnReq(), url);
 
@@ -76,6 +62,9 @@ module.exports.getPeers = (torrent, callback) => {
             // pass peers to callback
             callback(announceResp.peers);
         }
+        else if(respType(response) === 'error'){
+            console.log('[!] Server Error')
+        }
     });
 
 
@@ -89,6 +78,7 @@ function udpSend(socket, message, rawUrl, callback=()=>{}) {
 }
 
 /*
+Connect Request structure
 
 Offset  Size            Name            Value
 0       32-bit integer  action          0 // connect
@@ -129,6 +119,7 @@ function parseConnResp(resp){
 
 
 /*
+    Announce Request structure
 
     Offset  Size    Name    Value
     0       64-bit integer  connection_id
@@ -168,6 +159,9 @@ function buildAnnounceReq (connId,torrent, port=6881 ){
 }
 
 /*
+
+    Announce Response structure
+
 
     Offset      Size            Name            Value
     0           32-bit integer  action          1 // announce
@@ -213,4 +207,5 @@ function respType(resp) {
     const action = resp.readUInt32BE(0);
     if (action === 0) return 'connect';
     if (action === 1) return 'announce';
+    if (action === 3) return 'error';
   }

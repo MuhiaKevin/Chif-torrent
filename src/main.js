@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const Torrent = require('./torrent.js')
 const tracker = require('./tracker');
 
@@ -15,5 +17,6 @@ tracker.getPeers(torrent,peers => {
     peers.forEach(peer => {
         console.log(`peer: ${peer.ip}, ${peer.port}`)
     });
+    console.log(`\n${peers.length} : peers found`)
 })
   
