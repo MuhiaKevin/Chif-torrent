@@ -1,4 +1,6 @@
 const Torrent = require('./torrent.js')
+const tracker = require('./tracker');
+
 
 
 if(!process.argv[2]){
@@ -7,4 +9,11 @@ if(!process.argv[2]){
 }
 
 let torrent = new Torrent(process.argv[2]);
-console.log(torrent.size());
+
+
+tracker.getPeers(torrent,peers => {
+    peers.forEach(peer => {
+        console.log(`peer: ${peer.ip}, ${peer.port}`)
+    });
+})
+  

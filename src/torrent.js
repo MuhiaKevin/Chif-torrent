@@ -21,7 +21,7 @@ class Torrent {
   // return list of trackers from torrent file
   getannouncelist() {
     let announce_list = [];
-
+    
     for (let announce of this.torrent["announce-list"]) {
       announce_list.push(announce.toString('utf8'));
     }
@@ -29,6 +29,8 @@ class Torrent {
     return announce_list;
   }
 
+
+  
   // get total size of torrent files
   size(){
     const size = this.torrent.info.files ? 
@@ -39,6 +41,16 @@ class Torrent {
     return bignum.toBuffer(size, {size: 8});
   }
 
+  generate_peer_id(){
+    let id = null;
+
+    if(!id){
+      id = crypto.randomBytes(20);
+      Buffer.from('-CT0001').copy(id, 0 );
+    }
+
+    return id;
+  }
 
 }
 
