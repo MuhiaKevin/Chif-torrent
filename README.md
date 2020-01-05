@@ -11,15 +11,18 @@ This tool has the following features:
 -	Connect to peers
 
 ### Installation
-You can run the following command to install the dependencies using npm
+You can install the necessary dependecies by following below steps:
+
+`git clone https://github.com/MuhiaKevin/ChifTorrent.git`
+`cd ChifTorrent`
 `npm install `
 
 ### Running the program
 Run the following command to download a torrent file
 
 Example :
-
-`node main.js star-wars-the-rise-of-skywalker-2019-hdts-xvid-etrg.torrent`
+`cd src `
+`node main.js file.torrent`
 
 ### TODO
 - Add retry method when when request does not receive tracker
