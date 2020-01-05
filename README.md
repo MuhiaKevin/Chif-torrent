@@ -2,7 +2,7 @@
 
 An implementation of a torrent client in Node.js 
 
-Decided to feed my curiosity of a how bittorrent actually works by building a simple torrent client in Node Js.
+Decided to feed my curiosity of a how bittorrent actually works by building a simple Console-UI torrent client in Node Js.
 Happy Coding.
 
 This tool has the following features:

@@ -33,10 +33,8 @@ class Torrent {
 
   // get total size of torrent files
   size() {
-    const size = this.torrent.info.files ?
-
-      this.torrent.info.files.map(file => file.length).reduce((a, b) => a + b) :
-      this.torrent.info.length;
+    const size = this.torrent.info.files ? this.torrent.info.files.map(file => file.length).reduce((a, b) => a + b) :
+    this.torrent.info.length;
 
     return bignum.toBuffer(size, { size: 8 });
   }
