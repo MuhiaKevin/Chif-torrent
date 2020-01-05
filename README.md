@@ -11,19 +11,22 @@ This tool has the following features:
 -	Connect to peers
 
 ### Installation
-You can install the necessary dependecies by following below steps:
+You can install the necessary dependecies by following steps bellow:
 
-`git clone https://github.com/MuhiaKevin/ChifTorrent.git`
-`cd ChifTorrent`
-`npm install `
+```sh
+$ git clone https://github.com/MuhiaKevin/ChifTorrent.git
+$ cd ChifTorrent
+$ npm install
+```
 
 ### Running the program
 Run the following command to download a torrent file
 
 Example :
-`cd src `
-`node main.js file.torrent`
-
+```sh
+$ cd src/
+$ node main.js file.torrent
+```
 ### TODO
 - Add retry method when when request does not receive tracker
 - Get peers from all trackers that are working
