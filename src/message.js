@@ -2,7 +2,10 @@ const Buffer = require('buffer').Buffer;
 const Torrent = require('./torrent');
 
 
+
 /*
+    https://www.researchgate.net/figure/Message-sequence-in-a-typical-download_fig2_223808116
+    
     Peer Handshake  Format
     ========================
     handshake: <pstrlen><pstr><reserved><info_hash><peer_id>
@@ -32,7 +35,7 @@ module.exports.buildHandshake = torrent => {
     //infohash
     torrent.getinfoHash().copy(buf, 28);
     // peerid
-    buf.write(torrent.generate_peer_id().toString());
+    buf.write(torrent.generate_peer_id().toString('utf8'));
 
     return buf;
 

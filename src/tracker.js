@@ -38,11 +38,10 @@ module.exports.getPeers = (torrent, callback) => {
     socket.on('message', response => {
 
         if (respType(response) == 'connect') {
-            console.log('Received CONNECT response \n')
+            console.log('Received : CONNECT response \n')
 
             // parsing the connection id gives the connection id
             const connResp = parseConnResp(response);
-            console.log(connResp)
 
             // build an announce request with the help of the connection id extracted
             const announceReq = buildAnnounceReq(connResp.connectionId,torrent);
@@ -53,7 +52,7 @@ module.exports.getPeers = (torrent, callback) => {
 
         else if (respType(response) === 'announce') {
 
-            console.log('Received ANNOUNCE request\n')
+            console.log('Received : ANNOUNCE request\n')
 
             // parse announce response
             
@@ -75,6 +74,7 @@ module.exports.getPeers = (torrent, callback) => {
 function udpSend(socket, message, rawUrl, callback=()=>{}) {
     const url = urlParse(rawUrl);
     socket.send(message, 0, message.length, url.port, url.hostname, callback);
+    
 }
 
 /*

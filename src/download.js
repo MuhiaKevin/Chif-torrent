@@ -1,49 +1,57 @@
 const net = require('net');
 const Buffer = require('buffer').Buffer;
-const tracker = require('./tracker');
-const message = require('./message')
-
+const message = require('./message');
+const tracker = require('./tracker.js')
 
 module.exports = torrent => {
     tracker.getPeers(torrent, peers => {
-        peers.forEach(download);
+        // 1
+        peers.forEach(peer => download(peer, torrent));
+        console.log(`peer: ${peers.ip}, ${peers.port}`)
     });
 };
 
-function download(peer) {
-    // create client socket
-    const socket = new net.Socket();
-
-    socket.on('error', console.log); // catch errors when connection to peers fail
-
-    socket.connect(peer.port, peer.ip, function () {
-        // socket.write() // write message to peer 
+function download(peer, torrent) {
+    const socket = net.Socket();
+    socket.on('error', console.log);
+    socket.connect(peer.port, peer.ip, () => {
         socket.write(message.buildHandshake(torrent));
+
     });
 
-    onWholeMsg(socket, msg => msgHandler(msg, socket));
-
+    onWholeMsg(socket, msg => {
+        // handle response here
+        msgHandler(msg, socket)
+    });
 }
 
+// this function handles the posibblity of there not being whole messages
+
 function onWholeMsg(socket, callback) {
-    let savedbuf = Buffer.alloc(0);
+    let savedBuf = Buffer.alloc(0); // allocate some buffer 
     let handshake = true;
 
-    const msgLen = () => handshake ? savedbuf.readUInt8(0) + 49 : savedbuf.readInt32BE(0) + 4;
+    socket.on('data', recvBuf => {
+        const msgLen = () => handshake ? savedBuf.readUInt8(0) + 49 : savedBuf.readInt32BE(0) + 4;
+        savedBuf = Buffer.concat(savedBuf, recvBuf);
 
-    while (savedbuf.length >= 4 && savedbuf.length >= msgLen()) {
-        callback(savedbuf.slice(0, msgLen()));
-        savedBuf = savedBuf.slice(msgLen());
-        handshake = false;
+        while (savedBuf.length >= 4 && savedBuf.length >= msgLen()) {
+            callback(savedBuf.slice(0, msgLen()));
+            savedBuf = savedBuf.slice(msgLen());
+            handshake = false;
+        }
+    })
+}
+
+// check if message is a handshake then return send and interested message
+function msgHandler(msg, socket) {
+    if (isHandshake(msg)) {
+        socket.write(message.buildInterested());
     }
 }
 
-function msgHandler(msg, socket) {
-    if (isHandshake(msg)) socket.write(message.buildInterested());
-  }
-  
-  // 3
-  function isHandshake(msg) {
+// check if message is a handshake then return true and false for otherwise
+function isHandshake(msg) {
     return msg.length === msg.readUInt8(0) + 49 &&
-           msg.toString('utf8', 1) === 'BitTorrent protocol';
-  }
+        msg.toString('utf8', 1, 20) === 'BitTorrent protocol';
+}
