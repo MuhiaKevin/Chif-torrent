@@ -18,33 +18,48 @@ Steps in Tracker server communication
 
 
 module.exports.getPeers = (torrent, callback) => {
-
     const socket = dgram.createSocket('udp4');
 
     let announcelist = torrent.getannouncelist();
     let url = "";
+    let receivedConnRequest = false
+    let interval;
+
+    url = urlParse(announcelist[1].shift())
+    // url = urlParse('udp://tracker.torrent.eu.org:451/announce');
 
 
-    for (let i = 0; i < announcelist.length; i++) {
-        if (announcelist[i].substring(0, 3) === "udp") {
-            url = urlParse(announcelist[i]);
-            break;
+    udpSend(socket, buildConnReq(), url);
+
+    function retransmit() {
+        console.log(`Checking to see if there is a response from ${url.hostname}`)
+        if (checkifreceivedConnReq() != true) {
+            url = urlParse(announcelist[1].shift())
+            udpSend(socket, buildConnReq(), url);
         }
     }
 
-    udpSend(socket, buildConnReq(), url);
+    function checkifreceivedConnReq() {
+        return receivedConnRequest
+    }
+
+    interval = setInterval(retransmit, 5000)
 
     // this event is fired when the socket receives a message from the tracker server
     socket.on('message', response => {
 
         if (respType(response) == 'connect') {
             console.log('Received : CONNECT response \n')
+            receivedConnRequest = true
+            clearInterval(interval);
+            console.log(receivedConnRequest)
+
 
             // parsing the connection id gives the connection id
             const connResp = parseConnResp(response);
 
             // build an announce request with the help of the connection id extracted
-            const announceReq = buildAnnounceReq(connResp.connectionId,torrent);
+            const announceReq = buildAnnounceReq(connResp.connectionId, torrent);
 
             // now send the announce message
             udpSend(socket, announceReq, url);
@@ -55,13 +70,13 @@ module.exports.getPeers = (torrent, callback) => {
             console.log('Received : ANNOUNCE request\n')
 
             // parse announce response
-            
+
             const announceResp = parseAnnounceResp(response);
             console.log('announceResp')
             // pass peers to callback
             callback(announceResp.peers);
         }
-        else if(respType(response) === 'error'){
+        else if (respType(response) === 'error') {
             console.log('[!] Server Error')
         }
     });
@@ -71,10 +86,10 @@ module.exports.getPeers = (torrent, callback) => {
 
 
 // send udp message
-function udpSend(socket, message, rawUrl, callback=()=>{}) {
+function udpSend(socket, message, rawUrl, callback = () => { }) {
     const url = urlParse(rawUrl);
     socket.send(message, 0, message.length, url.port, url.hostname, callback);
-    
+
 }
 
 /*
@@ -89,7 +104,7 @@ Offset  Size            Name            Value
 */
 
 // build the connection message to send to the tracker as the first step
-function buildConnReq(){
+function buildConnReq() {
     // create a new empty buffer with a size of 16 bytes since we already know that the entire message should be 16 bytes long.
     const buf = Buffer.alloc(16);
 
@@ -108,7 +123,7 @@ function buildConnReq(){
 
 
 // parse the connection response from the tracker server
-function parseConnResp(resp){
+function parseConnResp(resp) {
     return {
         action: resp.readUInt32BE(0),
         transactionId: resp.readUInt32BE(4),
@@ -139,20 +154,20 @@ function parseConnResp(resp){
 
 */
 
-function buildAnnounceReq (connId,torrent, port=6881 ){
+function buildAnnounceReq(connId, torrent, port = 6881) {
     const buf = Buffer.allocUnsafe(98); // create a buffer of size 98
     connId.copy(buf, 0) // copy the connection id buf to buf size at 0
     buf.writeUInt32BE(1, 8) // write value 1(which means it is an announce request) at offset 8
-    crypto.randomBytes(4).copy(buf,12);
-    torrent.getinfoHash().copy(buf,16);
-    torrent.generate_peer_id().copy(buf,36);
+    crypto.randomBytes(4).copy(buf, 12);
+    torrent.getinfoHash().copy(buf, 16);
+    torrent.generate_peer_id().copy(buf, 36);
     Buffer.alloc(8).copy(buf, 56);
     torrent.size().copy(buf, 64);
     Buffer.alloc(8).copy(buf, 72);
     buf.writeUInt32BE(0, 80);
     buf.writeUInt32BE(0, 80) //try and change offset to 84
-    crypto.randomBytes(4).copy(buf,88);
-    buf.writeInt32BE(-1,92);
+    crypto.randomBytes(4).copy(buf, 88);
+    buf.writeInt32BE(-1, 92);
     buf.writeUInt16BE(port, 96);
 
     return buf
@@ -177,11 +192,11 @@ function buildAnnounceReq (connId,torrent, port=6881 ){
 
 function parseAnnounceResp(resp) {
 
-    function group(iterable, groupSize){
+    function group(iterable, groupSize) {
         let groups = [];
-        
-        for (let i = 0; i < iterable.length; i += groupSize){
-            groups.push(iterable.slice(i , i+groupSize));           
+
+        for (let i = 0; i < iterable.length; i += groupSize) {
+            groups.push(iterable.slice(i, i + groupSize));
         }
         return groups;
     }
@@ -193,7 +208,7 @@ function parseAnnounceResp(resp) {
         seeders: resp.readUInt32BE(12),
         peers: group(resp.slice(20), 6).map(adress => {
             return {
-                ip: adress.slice(0,4).join('.'),
+                ip: adress.slice(0, 4).join('.'),
                 port: adress.readUInt16BE(4)
             }
         })
@@ -208,4 +223,4 @@ function respType(resp) {
     if (action === 0) return 'connect';
     if (action === 1) return 'announce';
     if (action === 3) return 'error';
-  }
+}

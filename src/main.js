@@ -13,7 +13,6 @@ if(!process.argv[2]){
 
 let torrent = new Torrent(process.argv[2]);
 
-
 // tracker.getPeers(torrent,peers => {
 //     peers.forEach(peer => {
 //         console.log(`peer: ${peer.ip}, ${peer.port}`)

@@ -5,10 +5,12 @@ const tracker = require('./tracker.js')
 
 module.exports = torrent => {
     tracker.getPeers(torrent, peers => {
-        // 1
-        peers.forEach(peer => download(peer, torrent));
-        console.log(`peer: ${peers.ip}, ${peers.port}`)
-    });
+        peers.forEach(peer => {
+            download(peer, torrent)
+            console.log(`peer: ${peer.ip}, ${peer.port}`)
+        });
+
+    })
 };
 
 function download(peer, torrent) {
