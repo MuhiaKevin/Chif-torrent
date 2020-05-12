@@ -35,7 +35,7 @@ function onWholeMsg(socket, callback) {
 
     socket.on('data', recvBuf => {
         const msgLen = () => handshake ? savedBuf.readUInt8(0) + 49 : savedBuf.readInt32BE(0) + 4;
-        savedBuf = Buffer.concat(savedBuf, recvBuf);
+        savedBuf = Buffer.concat([savedBuf, recvBuf]);
 
         while (savedBuf.length >= 4 && savedBuf.length >= msgLen()) {
             callback(savedBuf.slice(0, msgLen()));
@@ -48,6 +48,7 @@ function onWholeMsg(socket, callback) {
 // check if message is a handshake then return send and interested message
 function msgHandler(msg, socket) {
     if (isHandshake(msg)) {
+        console.log(msg)
         socket.write(message.buildInterested());
     }
 }

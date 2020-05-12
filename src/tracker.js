@@ -5,6 +5,9 @@ const crypto = require('crypto'); // 1
 
 
 /*
+https://www.digitalocean.com/community/tutorials/using-buffers-in-node-js
+https://www.quora.com/What-is-the-size-of-an-integer-in-a-64-bit-computer
+
 
 Steps in Tracker server communication
 
@@ -26,8 +29,8 @@ module.exports.getPeers = (torrent, callback) => {
     let interval;
 
     url = urlParse(announcelist[1].shift())
-    // url = urlParse('udp://tracker.torrent.eu.org:451/announce');
 
+    // STEP 1. Send a connect request
 
     udpSend(socket, buildConnReq(), url);
 
@@ -43,7 +46,7 @@ module.exports.getPeers = (torrent, callback) => {
         return receivedConnRequest
     }
 
-    interval = setInterval(retransmit, 5000)
+    interval = setInterval(retransmit, 3000)
 
     // this event is fired when the socket receives a message from the tracker server
     socket.on('message', response => {
@@ -61,6 +64,8 @@ module.exports.getPeers = (torrent, callback) => {
             // build an announce request with the help of the connection id extracted
             const announceReq = buildAnnounceReq(connResp.connectionId, torrent);
 
+            // STEP 2. Get the connect response and extract the connection id
+            
             // now send the announce message
             udpSend(socket, announceReq, url);
         }
@@ -96,9 +101,9 @@ function udpSend(socket, message, rawUrl, callback = () => { }) {
 Connect Request structure
 
 Offset  Size            Name            Value
-0       32-bit integer  action          0 // connect
-4       32-bit integer  transaction_id
-8       64-bit integer  connection_id
+0       64-bit integer  connection_id   0x41727101980
+8       32-bit integer  action          0 // connect
+12      32-bit integer  transaction_id  ? // random
 16
 
 */
@@ -108,7 +113,9 @@ function buildConnReq() {
     // create a new empty buffer with a size of 16 bytes since we already know that the entire message should be 16 bytes long.
     const buf = Buffer.alloc(16);
 
-    //connection id => 0x indicates that the number is a hexadecimal number
+    //connection id - 0x indicates that the number is a hexadecimal number
+    // since node.js has no buf.writeUInt64BE,  we write 32-bit integer (4 bytes) with the value 0, and another to make it 64
+
     buf.writeUInt32BE(0x417, 0)
     buf.writeUInt32BE(0x27101980, 4)
 
@@ -194,7 +201,6 @@ function parseAnnounceResp(resp) {
 
     function group(iterable, groupSize) {
         let groups = [];
-
         for (let i = 0; i < iterable.length; i += groupSize) {
             groups.push(iterable.slice(i, i + groupSize));
         }

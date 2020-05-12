@@ -44,6 +44,7 @@ build/Release
 node_modules/
 jspm_packages/
 torrents/
+src/temp
 
 # TypeScript v1 declaration files
 typings/
