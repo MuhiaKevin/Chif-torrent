@@ -23,16 +23,20 @@ class Torrent {
     let http_announce_list =[]
     let udp_announce_list = [];
 
-    for (let announce of this.torrent["announce-list"]) {
-      if(announce.toString('utf8').substring(0, 3) === "udp"){
-        udp_announce_list.push(announce.toString('utf8'));
+    if(this.torrent["announce-list"]){
+      for (let announce of this.torrent["announce-list"]) {
+        if(announce.toString('utf8').substring(0, 3) === "udp"){
+          udp_announce_list.push(announce.toString('utf8'));
+        }
+        else{
+          http_announce_list.push(announce.toString('utf8'));
+        }
       }
-      else{
-        http_announce_list.push(announce.toString('utf8'));
-      }
+      return [http_announce_list, udp_announce_list];
     }
-
-    return [http_announce_list, udp_announce_list];
+    else{
+      return this.torrent.announce.toString()
+    }
   }
 
 

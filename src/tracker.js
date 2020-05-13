@@ -28,7 +28,7 @@ module.exports.getPeers = (torrent, callback) => {
     let receivedConnRequest = false
     let interval;
 
-    url = urlParse(announcelist[1].shift())
+    url = typeof(announcelist) === 'object' ? urlParse(announcelist[1].shift()) : announcelist; 
 
     // STEP 1. Send a connect request
 
