@@ -25,37 +25,48 @@ module.exports.getPeers = (torrent, callback) => {
 
     let announcelist = torrent.getannouncelist();
     let url = "";
-    let receivedConnRequest = false
+    let receivedAnnounceResp = false
     let interval;
+    let count = 0;
+    let requests = 8;
+    const resendSeconds = (2**requests) * 15;
 
-    url = typeof(announcelist) === 'object' ? urlParse(announcelist[1].shift()) : announcelist; 
+    url = typeof (announcelist) === 'object' ? urlParse(announcelist[1].shift()) : announcelist;
 
     // STEP 1. Send a connect request
 
     udpSend(socket, buildConnReq(), url);
 
+    /*
+        UDP is an 'unreliable' protocol. This means it doesn't retransmit
+        lost packets itself. The application is responsible for this. If a response is not received after 15 * 2 ^ n seconds,
+        the client should retransmit the request, where n starts at 0 and is increased up to 8 (3840 seconds) after every retransmission. 
+        Note that it is necessary to rerequest a connection ID when it has expired.
+    */
+
     function retransmit() {
-        console.log(`Checking to see if there is a response from ${url.hostname}`)
-        if (checkifreceivedConnReq() != true) {
-            url = urlParse(announcelist[1].shift())
+        if (receivedAnnounceResp != true && count === requests) {
+            console.log(`Trying ${url.hostname}`)
+            url = announcelist.length != 0 ? urlParse(announcelist[1].shift()) : urlParse(announcelist[1][0]);
             udpSend(socket, buildConnReq(), url);
+            count = 0;
+        }
+        else if (receivedAnnounceResp != true && count <= requests) {
+            console.log(`Retrying ${url.host} again`)
+            udpSend(socket, buildConnReq(), url);
+            count += 1;
         }
     }
 
-    function checkifreceivedConnReq() {
-        return receivedConnRequest
-    }
 
-    interval = setInterval(retransmit, 3000)
+    interval = setInterval(retransmit, resendSeconds)
 
     // this event is fired when the socket receives a message from the tracker server
     socket.on('message', response => {
 
         if (respType(response) == 'connect') {
             console.log('Received : CONNECT response \n')
-            receivedConnRequest = true
-            clearInterval(interval);
-            console.log(receivedConnRequest)
+            
 
 
             // parsing the connection id gives the connection id
@@ -65,7 +76,7 @@ module.exports.getPeers = (torrent, callback) => {
             const announceReq = buildAnnounceReq(connResp.connectionId, torrent);
 
             // STEP 2. Get the connect response and extract the connection id
-            
+
             // now send the announce message
             udpSend(socket, announceReq, url);
         }
@@ -73,6 +84,8 @@ module.exports.getPeers = (torrent, callback) => {
         else if (respType(response) === 'announce') {
 
             console.log('Received : ANNOUNCE request\n')
+            receivedAnnounceResp = true
+            clearInterval(interval);
 
             // parse announce response
 
