@@ -64,11 +64,7 @@ module.exports.getPeers = (torrent, callback) => {
     // this event is fired when the socket receives a message from the tracker server
     socket.on('message', response => {
 
-        if (respType(response) == 'connect') {
-            console.log('Received : CONNECT response \n')
-            
-
-
+        if (respType(response) == 'connect') {            
             // parsing the connection id gives the connection id
             const connResp = parseConnResp(response);
 
@@ -82,15 +78,13 @@ module.exports.getPeers = (torrent, callback) => {
         }
 
         else if (respType(response) === 'announce') {
-
-            console.log('Received : ANNOUNCE request\n')
+            // set variables for retransmission
             receivedAnnounceResp = true
             clearInterval(interval);
 
             // parse announce response
 
             const announceResp = parseAnnounceResp(response);
-            console.log('announceResp')
             // pass peers to callback
             callback(announceResp.peers);
         }
@@ -98,8 +92,6 @@ module.exports.getPeers = (torrent, callback) => {
             console.log('[!] Server Error')
         }
     });
-
-
 };
 
 
@@ -107,7 +99,6 @@ module.exports.getPeers = (torrent, callback) => {
 function udpSend(socket, message, rawUrl, callback = () => { }) {
     const url = urlParse(rawUrl);
     socket.send(message, 0, message.length, url.port, url.hostname, callback);
-
 }
 
 /*
@@ -149,7 +140,6 @@ function parseConnResp(resp) {
         transactionId: resp.readUInt32BE(4),
         connectionId: resp.slice(8)
     }
-
 }
 
 

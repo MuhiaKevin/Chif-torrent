@@ -15,6 +15,7 @@ http://thecodebarbarian.com/an-overview-of-buffers-in-node-js.html
 https://betterexplained.com/articles/understanding-big-and-little-endian-byte-order/
 https://www.geeksforgeeks.org/little-and-big-endian-mystery/
 https://betterexplained.com/articles/understanding-big-and-little-endian-byte-order/
+http://www.bittorrent.org/beps/bep_0003.html
 https://betterexplained.com/articles/unicode/
 https://github.com/naim94a/udpt/wiki/The-BitTorrent-UDP-tracker-protocol
 
