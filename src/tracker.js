@@ -87,7 +87,8 @@ module.exports.getPeers = (torrent, callback) => {
             const announceResp = parseAnnounceResp(response);
             // pass peers to callback
             callback(announceResp.peers);
-            if(url.substring(6,19) === '192.168.1.149'){
+            // when testing local opentracker Bitorrent tracker server
+            if(typeof(url) === 'string' && url.substring(6,19) === '192.168.1.149'){
                 socket.close()
             }
         }
