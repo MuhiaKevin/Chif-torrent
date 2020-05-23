@@ -28,8 +28,8 @@ $ cd src/
 $ node main.js file.torrent
 ```
 ### TODO
-- Add retry method when when request does not receive tracker
 - Get peers from all trackers that are working
+- implement a torrent file parser
 
 ### Future improvements
 These are some of the additional features i plan to reasearch and implement:

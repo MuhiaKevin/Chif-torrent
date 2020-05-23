@@ -87,6 +87,9 @@ module.exports.getPeers = (torrent, callback) => {
             const announceResp = parseAnnounceResp(response);
             // pass peers to callback
             callback(announceResp.peers);
+            if(url.substring(6,19) === '192.168.1.149'){
+                socket.close()
+            }
         }
         else if (respType(response) === 'error') {
             console.log('[!] Server Error')
@@ -133,7 +136,16 @@ function buildConnReq() {
 }
 
 
-// parse the connection response from the tracker server
+/*
+    parse the connection response from the tracker server
+
+    Offset  Size            Name            Value
+    0       32-bit integer  action          0 // connect
+    4       32-bit integer  transaction_id
+    8       64-bit integer  connection_id
+    16
+    
+*/
 function parseConnResp(resp) {
     return {
         action: resp.readUInt32BE(0),
@@ -224,7 +236,7 @@ function parseAnnounceResp(resp) {
     }
 }
 
-// checks the what the 
+// checks the what the message_id
 // Describes the type of packet 1 for announce and 0 for and connect 3 for error
 
 function respType(resp) {

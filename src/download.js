@@ -39,8 +39,46 @@ function onWholeMsg(socket, callback) {
 }
 
 function msgHandler(msg, socket) {
-    console.log(msg)
-    if (isHandshake(msg)) socket.write(message.buildInterested());
+    if (isHandshake(msg)) {
+        socket.write(message.buildInterested());
+    }
+    else{
+        // console.log(`Message length is : ${msg.length} message id is ${msg.readInt8(4)}`)
+        const m = message.parse(msg)
+        if(m.id === 0 ){
+            console.log('Choke message Sent')
+            // chokeHandler();
+        }
+        if(m.id === 1 ){
+            console.log('Unchoke message sent')
+            // unchokeHandler()
+        }
+        if(m.id === 2 ){
+            console.log('Interested message sent')
+        }
+        if(m.id === 3){
+            console.log('Not intersted message sent')
+        }
+        if(m.id === 4 ){
+            console.log('Have message sent')
+            // haveHandler(m.payload);
+        }
+        if(m.id === 5 ){
+            console.log('Bitfield message sent')
+            console.log(m.payload.toString('hex'))
+            // bitfieldHandler(m.payload);
+        }
+        if(m.id === 6 ){
+            console.log('Request message sent')
+        }
+        if(m.id === 7 ){
+            console.log('Piece message sent')
+            // pieceHandler(m.payload);
+        }
+        if(m.id === 8 ){
+            console.log('Cancel message sent')
+        }
+    }
 }
 
 function isHandshake(msg) {
