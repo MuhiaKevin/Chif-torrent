@@ -27,14 +27,4 @@ if(!process.argv[2]){
 }
 
 let torrent = new Torrent(process.argv[2]);
-
-// tracker.getPeers(torrent,peers => {
-//     peers.forEach(peer => {
-//         console.log(`peer: ${peer.ip}, ${peer.port}`)
-//         // console.log(peer);
-//     });
-//     console.log(`\n${peers.length} : peers found`)
-
-// })
-
-download(torrent);
+download(torrent, torrent.torrent.info.name);

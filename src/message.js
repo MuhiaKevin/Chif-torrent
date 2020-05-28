@@ -3,21 +3,17 @@ const Torrent = require('./torrent');
 
 
 
+
 /*
     https://www.researchgate.net/figure/Message-sequence-in-a-typical-download_fig2_223808116
     
     Peer Handshake  Format
     ========================
     handshake: <pstrlen><pstr><reserved><info_hash><peer_id>
-
     pstrlen: string length of <pstr>, as a single raw byte
- 
     pstr: string identifier of the protocol
- 
     reserved: eight (8) reserved bytes. All current implementations use all zeroes.
- 
     peer_id: 20-byte string used as a unique ID for the client.
-
     In version 1.0 of the BitTorrent protocol, pstrlen = 19, and pstr = "BitTorrent protocol".
         
 
@@ -40,9 +36,19 @@ module.exports.buildHandshake = torrent => {
     return buf;
 
 }
+/*
+    The length prefix is a four byte big-endian value. The message ID is a single decimal byte. The payload is message dependent.
+    Bellow are all other messages except the handshake
 
+*/
+
+
+// keep-alive: <len=0000>
 
 module.exports.buildKeepAlive = () => Buffer.alloc(4);
+
+
+// choke: <len=0001><id=0>
 
 module.exports.buildChoke = () => {
     const buf = Buffer.alloc(5);
@@ -52,6 +58,7 @@ module.exports.buildChoke = () => {
     buf.writeUInt8(0, 4);
     return buf;
 };
+// unchoke: <len=0001><id=1>
 
 module.exports.buildUnchoke = () => {
     const buf = Buffer.alloc(5);
@@ -61,6 +68,7 @@ module.exports.buildUnchoke = () => {
     buf.writeUInt8(1, 4);
     return buf;
 };
+// interested: <len=0001><id=2>
 
 module.exports.buildInterested = () => {
     const buf = Buffer.alloc(5);
@@ -71,6 +79,8 @@ module.exports.buildInterested = () => {
     return buf;
 };
 
+// not interested: <len=0001><id=3>
+
 module.exports.buildUninterested = () => {
     const buf = Buffer.alloc(5);
     // length
@@ -79,6 +89,8 @@ module.exports.buildUninterested = () => {
     buf.writeUInt8(3, 4);
     return buf;
 };
+
+// have: <len=0005><id=4><piece index>
 
 module.exports.buildHave = payload => {
     const buf = Buffer.alloc(9);
@@ -90,6 +102,7 @@ module.exports.buildHave = payload => {
     buf.writeUInt32BE(payload, 5);
     return buf;
 };
+// bitfield: <len=0001+X><id=5><bitfield>
 
 module.exports.buildBitfield = bitfield => {
     const buf = Buffer.alloc(14);
@@ -101,6 +114,9 @@ module.exports.buildBitfield = bitfield => {
     bitfield.copy(buf, 5);
     return buf;
 };
+
+// request: <len=0013><id=6><index><begin><length>
+
 
 module.exports.buildRequest = payload => {
     const buf = Buffer.alloc(17);
@@ -117,6 +133,8 @@ module.exports.buildRequest = payload => {
     return buf;
 };
 
+// piece: <len=0009+X><id=7><index><begin><block>
+
 module.exports.buildPiece = payload => {
     const buf = Buffer.alloc(payload.block.length + 13);
     // length
@@ -132,6 +150,9 @@ module.exports.buildPiece = payload => {
     return buf;
 };
 
+// cancel: <len=0013><id=8><index><begin><length>
+
+
 module.exports.buildCancel = payload => {
     const buf = Buffer.alloc(17);
     // length
@@ -146,6 +167,9 @@ module.exports.buildCancel = payload => {
     buf.writeUInt32BE(payload.length, 13);
     return buf;
 };
+
+
+// port: <len=0003><id=9><listen-port>
 
 module.exports.buildPort = payload => {
     const buf = Buffer.alloc(7);

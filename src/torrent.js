@@ -8,6 +8,7 @@ const bignum = require('bignum')
 class Torrent {
   constructor(torrent_file) {
     this.torrent = bencode.decode(fs.readFileSync(torrent_file));
+    this.BLOCK_LEN = Math.pow(2, 14);
 
   }
 
@@ -58,6 +59,31 @@ class Torrent {
       Buffer.from('-CT0001-').copy(id, 0);
     }
     return id;
+  }
+
+  pieceLen(pieceIndex){
+    const totalLength = bignum.fromBuffer(this.size()).toNumber()
+    const pieceLength = this.torrent.info['piece length'];
+
+    const lastPieceLength = totalLength %  pieceLength;
+    const lastPieceIndex = Math.floor(totalLength / pieceLength)
+    
+    return lastPieceIndex === pieceIndex ? lastPieceLength : pieceLength
+  }
+
+  blocksPerPiece(pieceIndex){
+    const pieceLength = this.pieceLen(pieceIndex);
+    return Math.ceil(pieceLength / this.BLOCK_LEN);
+  }
+
+  blockLen(pieceIndex, blockIndex){
+    const pieceLength = this.pieceLen(pieceIndex);
+
+    const lastPieceLength = pieceLength % this.BLOCK_LEN;
+    const lastPieceIndex = Math.floor(pieceLength / this.BLOCK_LEN);
+
+    return blockIndex === lastPieceIndex ? lastPieceLength : this.BLOCK_LEN;
+
   }
 
 }
